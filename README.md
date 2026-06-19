@@ -16,6 +16,9 @@ https://www.youtube.com/watch?v=1a1VXDdIyrk
 Run the local web app:
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
 python3 -m smartthreads.web
 ```
 
@@ -23,6 +26,12 @@ Then open:
 
 ```text
 http://127.0.0.1:8765
+```
+
+For a quick no-install dev run from the repo root:
+
+```bash
+PYTHONPATH=src python3 -m smartthreads.web
 ```
 
 Run against local Ollama:
