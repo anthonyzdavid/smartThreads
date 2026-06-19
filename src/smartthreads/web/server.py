@@ -21,16 +21,25 @@ MAX_BODY_BYTES = 2 * 1024 * 1024
 
 
 def config_from_payload(payload: dict) -> HarnessConfig:
+    provider = _empty_to_none(payload.get("force_provider")) or _empty_to_none(payload.get("provider"))
+    model = _empty_to_none(payload.get("model"))
+    base_url = _empty_to_none(payload.get("base_url"))
+    if provider in ("internet", "openai") and payload.get("force_provider"):
+        model = _empty_to_none(payload.get("internet_model")) or model
+        base_url = _empty_to_none(payload.get("internet_base_url")) or base_url
+
     timeout = payload.get("timeout")
     if timeout in ("", None):
         timeout = None
 
     return HarnessConfig.from_env(
-        provider=_empty_to_none(payload.get("provider")),
-        model=_empty_to_none(payload.get("model")),
-        base_url=_empty_to_none(payload.get("base_url")),
+        provider=provider,
+        model=model,
+        base_url=base_url,
         api_key=_empty_to_none(payload.get("api_key")),
         timeout=float(timeout) if timeout is not None else None,
+        internet_model=_empty_to_none(payload.get("internet_model")),
+        internet_base_url=_empty_to_none(payload.get("internet_base_url")),
     )
 
 

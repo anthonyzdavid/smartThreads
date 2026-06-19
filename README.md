@@ -5,6 +5,8 @@ LLMs and internet-hosted LLMs without changing the calling code.
 
 The first supported backends are:
 
+- `auto`: local-first routing that escalates to internet models when local fails
+  or returns a weak answer.
 - `local` / `ollama`: Ollama's local `/api/chat` endpoint.
 - `internet` / `openai`: OpenAI-compatible `/v1/chat/completions` endpoints.
 
@@ -54,9 +56,11 @@ python3 -m smartthreads --help
 
 Useful flags:
 
-- `--provider`: `local`, `ollama`, `internet`, or `openai`.
+- `--provider`: `auto`, `local`, `ollama`, `internet`, or `openai`.
 - `--model`: model name for the selected provider.
 - `--base-url`: backend base URL.
+- `--internet-model`: internet fallback model for auto mode.
+- `--internet-base-url`: internet fallback base URL for auto mode.
 - `--api-key`: bearer token for internet providers.
 - `--prompt`: user prompt. If omitted, stdin is used.
 - `--image`: optional image path. May be repeated.
@@ -69,8 +73,11 @@ smartthreads-web --host 127.0.0.1 --port 8765
 ```
 
 The web app provides a provider selector, model and base URL controls, API key
-entry for internet providers, a system prompt field, and a chat thread backed by
-the same harness used by the CLI.
+entry for internet providers, internet fallback controls for auto mode, a system
+prompt field, and a chat thread backed by the same harness used by the CLI. Auto
+mode tries the local model first, then escalates when the local call fails or the
+answer looks too weak for the task. The Internet button bypasses auto routing
+for one prompt.
 
 ## Environment Variables
 
@@ -79,6 +86,8 @@ the same harness used by the CLI.
 - `SMARTTHREADS_BASE_URL`
 - `SMARTTHREADS_API_KEY`
 - `SMARTTHREADS_TIMEOUT`
+- `SMARTTHREADS_INTERNET_MODEL`
+- `SMARTTHREADS_INTERNET_BASE_URL`
 
 ## Development
 

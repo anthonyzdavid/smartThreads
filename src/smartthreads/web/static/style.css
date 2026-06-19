@@ -111,10 +111,18 @@ label {
 }
 
 .control-group,
-.system-block {
+.system-block,
+.fallback-panel {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.fallback-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.56);
 }
 
 .control-grid {
@@ -231,6 +239,13 @@ textarea:focus {
   resize: none;
 }
 
+.composer-actions {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .composer button {
   width: 96px;
   height: 48px;
@@ -246,9 +261,26 @@ textarea:focus {
   background: var(--accent-strong);
 }
 
+.composer .secondary-button {
+  border: 1px solid var(--line);
+  color: var(--accent-strong);
+  background: #ffffff;
+}
+
+.composer .secondary-button:hover {
+  background: #eef4f1;
+}
+
 .composer button:disabled {
   cursor: wait;
   opacity: 0.64;
+}
+
+.route-note {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 @media (max-width: 860px) {

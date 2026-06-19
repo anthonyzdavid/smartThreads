@@ -17,6 +17,24 @@ def test_config_from_payload_uses_provider_defaults(monkeypatch):
     assert config.timeout == 8
 
 
+def test_config_from_payload_supports_force_internet():
+    config = config_from_payload(
+        {
+            "provider": "auto",
+            "force_provider": "internet",
+            "model": "local-model",
+            "base_url": "http://localhost:11434",
+            "internet_model": "cloud-model",
+            "internet_base_url": "https://cloud.example/v1",
+            "api_key": "token",
+        }
+    )
+
+    assert config.normalized_provider == "internet"
+    assert config.model == "cloud-model"
+    assert config.base_url == "https://cloud.example/v1"
+
+
 def test_get_index_serves_app():
     with run_test_server() as server:
         connection = http.client.HTTPConnection(server.host, server.port)
@@ -46,7 +64,7 @@ def test_post_chat_routes_to_harness():
         connection.request(
             "POST",
             "/api/chat",
-            body=json.dumps({"provider": "local", "prompt": "hello", "system": "sys"}),
+            body=json.dumps({"provider": "auto", "prompt": "hello", "system": "sys"}),
             headers={"Content-Type": "application/json"},
         )
         response = connection.getresponse()
@@ -56,7 +74,7 @@ def test_post_chat_routes_to_harness():
     assert body["text"] == "done"
     assert seen["prompt"] == "hello"
     assert seen["system"] == "sys"
-    assert seen["config"].normalized_provider == "local"
+    assert seen["config"].normalized_provider == "auto"
 
 
 class run_test_server:
