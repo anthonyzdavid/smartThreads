@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>smartThreads</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Provider controls">
+        <div class="brand-block">
+          <h1>smartThreads</h1>
+          <span id="connectionPill" class="status-pill">Local</span>
+        </div>
+
+        <section class="control-group">
+          <label for="provider">Provider</label>
+          <select id="provider">
+            <option value="local">Local Ollama</option>
+            <option value="internet">Internet LLM</option>
+          </select>
+        </section>
+
+        <section class="control-group">
+          <label for="model">Model</label>
+          <input id="model" type="text" autocomplete="off" spellcheck="false">
+        </section>
+
+        <section class="control-group">
+          <label for="baseUrl">Base URL</label>
+          <input id="baseUrl" type="url" autocomplete="off" spellcheck="false">
+        </section>
+
+        <section class="control-group" id="apiKeyGroup">
+          <label for="apiKey">API Key</label>
+          <input id="apiKey" type="password" autocomplete="off" placeholder="Env key loaded if blank">
+        </section>
+
+        <section class="control-grid">
+          <div class="control-group">
+            <label for="timeout">Timeout</label>
+            <input id="timeout" type="number" min="1" step="1">
+          </div>
+          <button id="resetDefaults" class="icon-button" type="button" title="Reset provider defaults" aria-label="Reset provider defaults">↺</button>
+        </section>
+
+        <section class="system-block">
+          <label for="systemPrompt">System</label>
+          <textarea id="systemPrompt" rows="5">You are smartThreads, a concise AI routing harness.</textarea>
+        </section>
+      </aside>
+
+      <section class="workspace" aria-label="Chat workspace">
+        <header class="workspace-header">
+          <div>
+            <p class="eyebrow">AI Harness</p>
+            <h2>Chat Router</h2>
+          </div>
+          <div id="runtimeStatus" class="runtime-status">Ready</div>
+        </header>
+
+        <section id="thread" class="thread" aria-live="polite">
+          <article class="message assistant">
+            <div class="message-meta">smartThreads</div>
+            <p>Choose a provider, ask a question, and the harness will route it through the selected backend.</p>
+          </article>
+        </section>
+
+        <form id="chatForm" class="composer">
+          <textarea id="prompt" rows="3" placeholder="Ask the harness anything..." required></textarea>
+          <button id="sendButton" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

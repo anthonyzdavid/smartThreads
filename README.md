@@ -11,6 +11,18 @@ The first supported backends are:
 ## Quick Start
 https://www.youtube.com/watch?v=1a1VXDdIyrk
 
+Run the local web app:
+
+```bash
+python3 -m smartthreads.web
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8765
+```
+
 Run against local Ollama:
 
 ```bash
@@ -49,6 +61,16 @@ Useful flags:
 - `--prompt`: user prompt. If omitted, stdin is used.
 - `--image`: optional image path. May be repeated.
 - `--json`: print a structured response envelope.
+
+## Web App
+
+```bash
+smartthreads-web --host 127.0.0.1 --port 8765
+```
+
+The web app provides a provider selector, model and base URL controls, API key
+entry for internet providers, a system prompt field, and a chat thread backed by
+the same harness used by the CLI.
 
 ## Environment Variables
 
