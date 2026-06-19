@@ -9,6 +9,7 @@ The first supported backends are:
 - `internet` / `openai`: OpenAI-compatible `/v1/chat/completions` endpoints.
 
 ## Quick Start
+https://www.youtube.com/watch?v=1a1VXDdIyrk
 
 Run against local Ollama:
 
