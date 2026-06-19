@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from smartthreads.costs import usage_from_openai
+
 from .base import BaseProvider, ProviderError, ProviderResponse
 from .images import image_data_url
 
@@ -42,6 +44,7 @@ class OpenAICompatibleProvider(BaseProvider):
             model=self.config.model,
             text=text,
             raw=raw,
+            usage=usage_from_openai(self.config.model, raw.get("usage")),
         )
 
     def _user_content(self, prompt: str, image_paths: Iterable[str]) -> str | list[dict]:

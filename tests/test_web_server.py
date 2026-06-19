@@ -5,7 +5,7 @@ from http.server import ThreadingHTTPServer
 
 from smartthreads.config import HarnessConfig
 from smartthreads.harness import HarnessResult
-from smartthreads.web.server import config_from_payload, create_handler
+from smartthreads.web.server import config_from_payload, create_handler, discover_models
 
 
 def test_config_from_payload_uses_provider_defaults(monkeypatch):
@@ -75,6 +75,38 @@ def test_post_chat_routes_to_harness():
     assert seen["prompt"] == "hello"
     assert seen["system"] == "sys"
     assert seen["config"].normalized_provider == "auto"
+
+
+def test_discover_models_reports_local_and_internet(monkeypatch):
+    def fake_get_json(url, timeout, headers=None):
+        if url.endswith("/api/tags"):
+            return {"models": [{"name": "llama3.2:latest", "size": 123}]}
+        if url.endswith("/models"):
+            assert headers == {"Authorization": "Bearer token"}
+            return {"data": [{"id": "gpt-4o-mini", "owned_by": "openai"}]}
+        raise AssertionError(url)
+
+    monkeypatch.setattr("smartthreads.web.server._get_json", fake_get_json)
+
+    result = discover_models(
+        HarnessConfig(
+            provider="auto",
+            api_key="token",
+            internet_base_url="https://api.example/v1",
+        )
+    )
+
+    assert result["local"]["verified"] is True
+    assert result["local"]["models"][0]["id"] == "llama3.2:latest"
+    assert result["internet"]["verified"] is True
+    assert result["internet"]["models"][0]["id"] == "gpt-4o-mini"
+
+
+def test_discover_models_marks_missing_internet_key():
+    result = discover_models(HarnessConfig(provider="auto", api_key=None))
+
+    assert result["internet"]["verified"] is False
+    assert "API key" in result["internet"]["error"]
 
 
 class run_test_server:

@@ -14,6 +14,8 @@ const internetButton = document.querySelector("#internetButton");
 const runtimeStatus = document.querySelector("#runtimeStatus");
 const connectionPill = document.querySelector("#connectionPill");
 const resetDefaults = document.querySelector("#resetDefaults");
+const checkModels = document.querySelector("#checkModels");
+const modelInventory = document.querySelector("#modelInventory");
 
 const defaults = {
   auto: {
@@ -54,7 +56,7 @@ function updateProviderView() {
   sendButton.textContent = selected === "auto" ? "Auto Send" : "Send";
 }
 
-function addMessage(role, text, meta, note = "") {
+function addMessage(role, text, meta, note = "", usage = {}) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
 
@@ -71,6 +73,13 @@ function addMessage(role, text, meta, note = "") {
     routeNote.className = "route-note";
     routeNote.textContent = note;
     article.append(routeNote);
+  }
+  const usageLine = formatUsage(usage);
+  if (usageLine) {
+    const usageNote = document.createElement("div");
+    usageNote.className = "usage-note";
+    usageNote.textContent = usageLine;
+    article.append(usageNote);
   }
   thread.append(article);
   thread.scrollTop = thread.scrollHeight;
@@ -135,7 +144,7 @@ async function sendPrompt(event, forceProvider = "") {
       throw new Error(body.error || "Request failed");
     }
 
-    addMessage("assistant", body.text, `${body.provider} · ${body.model}`, body.route_reason || "");
+    addMessage("assistant", body.text, `${body.provider} · ${body.model}`, body.route_reason || "", body.usage || {});
     setRuntimeStatus("Ready", "ok");
   } catch (error) {
     addMessage("error", error.message, "Error");
@@ -147,6 +156,116 @@ async function sendPrompt(event, forceProvider = "") {
   }
 }
 
+function formatUsage(usage) {
+  if (!usage) {
+    return "";
+  }
+  const hasUsage = usage.input_tokens !== null && usage.input_tokens !== undefined
+    || usage.output_tokens !== null && usage.output_tokens !== undefined
+    || usage.total_tokens !== null && usage.total_tokens !== undefined
+    || usage.estimated_cost_usd !== null && usage.estimated_cost_usd !== undefined;
+  if (!hasUsage) {
+    return "";
+  }
+
+  const parts = [];
+  if (usage.input_tokens !== null && usage.input_tokens !== undefined) {
+    parts.push(`in ${usage.input_tokens}`);
+  }
+  if (usage.output_tokens !== null && usage.output_tokens !== undefined) {
+    parts.push(`out ${usage.output_tokens}`);
+  }
+  if (usage.total_tokens !== null && usage.total_tokens !== undefined) {
+    parts.push(`total ${usage.total_tokens}`);
+  }
+  if (usage.estimated_cost_usd !== null && usage.estimated_cost_usd !== undefined) {
+    parts.push(`cost ${formatCost(usage.estimated_cost_usd)}`);
+  }
+
+  return `Tokens: ${parts.join(" · ")}${usage.cost_note ? ` · ${usage.cost_note}` : ""}`;
+}
+
+function formatCost(value) {
+  if (value === 0) {
+    return "$0.00";
+  }
+  if (value < 0.0001) {
+    return `<$0.0001`;
+  }
+  return `$${value.toFixed(4)}`;
+}
+
+async function checkAvailableModels() {
+  checkModels.disabled = true;
+  modelInventory.innerHTML = "<p>Checking local and internet models...</p>";
+  try {
+    const response = await fetch("/api/models", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestPayload("model-check")),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      throw new Error(body.error || "Model check failed");
+    }
+    renderModelInventory(body);
+  } catch (error) {
+    modelInventory.innerHTML = "";
+    const message = document.createElement("p");
+    message.className = "inventory-error";
+    message.textContent = error.message;
+    modelInventory.append(message);
+  } finally {
+    checkModels.disabled = false;
+  }
+}
+
+function renderModelInventory(body) {
+  modelInventory.innerHTML = "";
+  modelInventory.append(
+    modelGroup("Local Ollama", body.local),
+    modelGroup("Internet API", body.internet),
+  );
+}
+
+function modelGroup(title, result) {
+  result = result || { verified: false, models: [], error: "No response returned" };
+  const group = document.createElement("div");
+  group.className = "model-group";
+
+  const heading = document.createElement("div");
+  heading.className = "model-group-heading";
+  heading.textContent = `${title}: ${result.verified ? "verified" : "not verified"}`;
+  group.append(heading);
+
+  if (result.error) {
+    const error = document.createElement("p");
+    error.className = "inventory-error";
+    error.textContent = result.error;
+    group.append(error);
+  }
+
+  const list = document.createElement("ul");
+  const models = result.models || [];
+  for (const item of models.slice(0, 8)) {
+    const row = document.createElement("li");
+    row.textContent = item.id;
+    list.append(row);
+  }
+  if (models.length > 8) {
+    const row = document.createElement("li");
+    row.textContent = `+ ${models.length - 8} more`;
+    list.append(row);
+  }
+  if (!models.length && !result.error) {
+    const row = document.createElement("li");
+    row.textContent = "No models returned";
+    list.append(row);
+  }
+  group.append(list);
+  return group;
+}
+
 function autosizePrompt() {
   promptInput.style.height = "auto";
   promptInput.style.height = `${Math.min(promptInput.scrollHeight, 180)}px`;
@@ -154,6 +273,7 @@ function autosizePrompt() {
 
 provider.addEventListener("change", applyProviderDefaults);
 resetDefaults.addEventListener("click", applyProviderDefaults);
+checkModels.addEventListener("click", checkAvailableModels);
 form.addEventListener("submit", sendPrompt);
 internetButton.addEventListener("click", () => sendPrompt(null, "internet"));
 promptInput.addEventListener("input", autosizePrompt);

@@ -20,6 +20,7 @@ class HarnessResult:
     raw: dict
     route_reason: str | None = None
     attempted_providers: tuple[str, ...] = ()
+    usage: dict | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -29,6 +30,7 @@ class HarnessResult:
             "raw": self.raw,
             "route_reason": self.route_reason,
             "attempted_providers": list(self.attempted_providers),
+            "usage": self.usage or {},
         }
 
 
@@ -63,6 +65,7 @@ class AIHarness:
             text=response.text,
             raw=response.raw,
             attempted_providers=(response.provider,),
+            usage=response.usage.to_dict(),
         )
 
     def _build_provider(self, config: HarnessConfig):
@@ -131,6 +134,7 @@ class AIHarness:
                     },
                     route_reason=f"Kept local answer; internet fallback failed after: {escalation_reason}",
                     attempted_providers=tuple(attempted),
+                    usage=local_response.usage.to_dict(),
                 )
 
             return HarnessResult(
@@ -143,6 +147,7 @@ class AIHarness:
                 },
                 route_reason=f"Escalated from local: {escalation_reason}",
                 attempted_providers=tuple(attempted),
+                usage=internet_response.usage.to_dict(),
             )
 
         return HarnessResult(
@@ -152,6 +157,7 @@ class AIHarness:
             raw=local_response.raw,
             route_reason="Local answer looked sufficient",
             attempted_providers=tuple(attempted),
+            usage=local_response.usage.to_dict(),
         )
 
     def _ask_internet_after_local_failure(
@@ -186,6 +192,7 @@ class AIHarness:
             },
             route_reason=f"Escalated because local failed: {local_error}",
             attempted_providers=tuple(attempted),
+            usage=internet_response.usage.to_dict(),
         )
 
 

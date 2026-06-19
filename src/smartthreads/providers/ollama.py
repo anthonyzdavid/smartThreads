@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Iterable
 
+from smartthreads.costs import usage_from_ollama
+
 from .base import BaseProvider, ProviderError, ProviderResponse
 from .images import read_image_base64
 
@@ -44,4 +46,5 @@ class OllamaProvider(BaseProvider):
             model=self.config.model,
             text=text,
             raw=raw,
+            usage=usage_from_ollama(raw),
         )

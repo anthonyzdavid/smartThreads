@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from typing import Iterable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from smartthreads.config import HarnessConfig
+from smartthreads.costs import TokenUsage
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class ProviderResponse:
     model: str
     text: str
     raw: dict
+    usage: TokenUsage = field(default_factory=TokenUsage)
 
 
 class ProviderError(RuntimeError):

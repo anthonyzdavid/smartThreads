@@ -23,6 +23,13 @@
           </select>
         </section>
 
+        <section class="model-check-panel">
+          <button id="checkModels" type="button">Check Models</button>
+          <div id="modelInventory" class="model-inventory" aria-live="polite">
+            <p>Local and internet model checks will appear here.</p>
+          </div>
+        </section>
+
         <section class="control-group">
           <label for="model">Model</label>
           <input id="model" type="text" autocomplete="off" spellcheck="false">
@@ -75,7 +82,7 @@
         <section id="thread" class="thread" aria-live="polite">
           <article class="message assistant">
             <div class="message-meta">smartThreads</div>
-            <p>Choose a provider, ask a question, and the harness will route it through the selected backend.</p>
+            <p>Choose a provider, ask a question, and the harness will show routing, tokens, and cost for each answer.</p>
           </article>
         </section>
 

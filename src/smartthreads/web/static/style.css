@@ -125,6 +125,58 @@ label {
   background: rgba(255, 255, 255, 0.56);
 }
 
+.model-check-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.model-check-panel button {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px 12px;
+  color: var(--accent-strong);
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.model-inventory {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.56);
+  font-size: 13px;
+}
+
+.model-group + .model-group {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.model-group-heading {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.model-inventory ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.model-inventory li {
+  margin: 3px 0;
+  word-break: break-word;
+}
+
+.inventory-error {
+  margin-top: 6px;
+  color: var(--signal);
+}
+
 .control-grid {
   align-items: end;
 }
@@ -276,7 +328,8 @@ textarea:focus {
   opacity: 0.64;
 }
 
-.route-note {
+.route-note,
+.usage-note {
   margin-top: 10px;
   color: var(--muted);
   font-size: 13px;

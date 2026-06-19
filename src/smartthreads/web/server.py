@@ -7,8 +7,9 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
 import mimetypes
-import socket
 from typing import Callable
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 import webbrowser
 
 from smartthreads.config import HarnessConfig
@@ -76,6 +77,9 @@ def create_handler(
 
         def do_POST(self) -> None:
             if self.path != "/api/chat":
+                if self.path == "/api/models":
+                    self._handle_models()
+                    return
                 self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
                 return
 
@@ -100,6 +104,16 @@ def create_handler(
                 return
 
             self._send_json(result.to_dict())
+
+        def _handle_models(self) -> None:
+            try:
+                payload = self._read_json()
+                config = config_from_payload(payload)
+                self._send_json(discover_models(config))
+            except ValueError as exc:
+                self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_REQUEST)
+            except HarnessError as exc:
+                self._send_json({"error": str(exc)}, status=HTTPStatus.BAD_GATEWAY)
 
         def log_message(self, format: str, *args) -> None:
             return
@@ -177,3 +191,99 @@ def _empty_to_none(value):
     if isinstance(value, str) and not value.strip():
         return None
     return value
+
+
+def discover_models(config: HarnessConfig) -> dict:
+    local = _discover_ollama(config)
+    internet_config = HarnessConfig.from_env(
+        provider="internet",
+        model=config.internet_model,
+        base_url=config.internet_base_url,
+        api_key=config.api_key,
+        timeout=config.timeout,
+    )
+    internet = _discover_openai_compatible(internet_config)
+    return {
+        "local": local,
+        "internet": internet,
+    }
+
+
+def _discover_ollama(config: HarnessConfig) -> dict:
+    try:
+        raw = _get_json(f"{config.base_url}/api/tags", timeout=config.timeout)
+    except HarnessError as exc:
+        return {
+            "verified": False,
+            "error": str(exc),
+            "models": [],
+        }
+
+    models = []
+    for item in raw.get("models", []):
+        name = item.get("name") or item.get("model")
+        if name:
+            models.append(
+                {
+                    "id": name,
+                    "size": item.get("size"),
+                    "modified_at": item.get("modified_at"),
+                }
+            )
+
+    return {
+        "verified": True,
+        "models": models,
+    }
+
+
+def _discover_openai_compatible(config: HarnessConfig) -> dict:
+    if not config.api_key:
+        return {
+            "verified": False,
+            "error": "API key is required to verify internet models.",
+            "models": [],
+        }
+
+    try:
+        raw = _get_json(
+            f"{config.base_url}/models",
+            timeout=config.timeout,
+            headers={"Authorization": f"Bearer {config.api_key}"},
+        )
+    except HarnessError as exc:
+        return {
+            "verified": False,
+            "error": str(exc),
+            "models": [],
+        }
+
+    models = []
+    for item in raw.get("data", []):
+        model_id = item.get("id")
+        if model_id:
+            models.append({"id": model_id, "owner": item.get("owned_by")})
+
+    return {
+        "verified": True,
+        "models": models,
+    }
+
+
+def _get_json(url: str, *, timeout: float, headers: dict[str, str] | None = None) -> dict:
+    request_headers = {"Accept": "application/json"}
+    request_headers.update(headers or {})
+    request = Request(url, headers=request_headers, method="GET")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            body = response.read().decode("utf-8")
+    except HTTPError as exc:
+        details = exc.read().decode("utf-8", errors="replace")
+        raise HarnessError(f"model discovery HTTP {exc.code}: {details}") from exc
+    except URLError as exc:
+        raise HarnessError(f"model discovery failed: {exc.reason}") from exc
+
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise HarnessError("model discovery returned invalid JSON") from exc

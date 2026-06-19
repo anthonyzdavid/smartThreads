@@ -14,7 +14,11 @@ def test_ollama_payload_includes_base64_image(monkeypatch, tmp_path):
     def fake_post(self, url, payload, headers=None):
         seen["url"] = url
         seen["payload"] = payload
-        return {"message": {"content": "TRACKING"}}
+        return {
+            "message": {"content": "TRACKING"},
+            "prompt_eval_count": 12,
+            "eval_count": 4,
+        }
 
     monkeypatch.setattr(OllamaProvider, "_post_json", fake_post)
 
@@ -26,6 +30,10 @@ def test_ollama_payload_includes_base64_image(monkeypatch, tmp_path):
     assert seen["payload"]["messages"][1]["images"] == [
         base64.b64encode(b"jpg-bytes").decode("ascii")
     ]
+    assert response.usage.input_tokens == 12
+    assert response.usage.output_tokens == 4
+    assert response.usage.total_tokens == 16
+    assert response.usage.estimated_cost_usd == 0.0
 
 
 def test_openai_compatible_payload(monkeypatch):
@@ -35,7 +43,10 @@ def test_openai_compatible_payload(monkeypatch):
         seen["url"] = url
         seen["payload"] = payload
         seen["headers"] = headers
-        return {"choices": [{"message": {"content": "clear"}}]}
+        return {
+            "choices": [{"message": {"content": "clear"}}],
+            "usage": {"prompt_tokens": 1000, "completion_tokens": 500, "total_tokens": 1500},
+        }
 
     monkeypatch.setattr(OpenAICompatibleProvider, "_post_json", fake_post)
 
@@ -55,6 +66,9 @@ def test_openai_compatible_payload(monkeypatch):
         "messages": [{"role": "user", "content": "scan"}],
     }
     assert seen["headers"] == {"Authorization": "Bearer token"}
+    assert response.usage.input_tokens == 1000
+    assert response.usage.output_tokens == 500
+    assert response.usage.total_tokens == 1500
 
 
 def test_openai_requires_api_key():
