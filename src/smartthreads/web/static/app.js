@@ -178,11 +178,24 @@ function formatUsage(usage) {
   if (usage.total_tokens !== null && usage.total_tokens !== undefined) {
     parts.push(`total ${usage.total_tokens}`);
   }
+  if (usage.tokens_per_second !== null && usage.tokens_per_second !== undefined) {
+    parts.push(`speed ${formatTokensPerSecond(usage.tokens_per_second)}`);
+  }
   if (usage.estimated_cost_usd !== null && usage.estimated_cost_usd !== undefined) {
     parts.push(`cost ${formatCost(usage.estimated_cost_usd)}`);
   }
 
   return `Tokens: ${parts.join(" · ")}${usage.cost_note ? ` · ${usage.cost_note}` : ""}`;
+}
+
+function formatTokensPerSecond(value) {
+  if (value >= 100) {
+    return `${Math.round(value)} tok/s`;
+  }
+  if (value >= 10) {
+    return `${value.toFixed(1)} tok/s`;
+  }
+  return `${value.toFixed(2)} tok/s`;
 }
 
 function formatCost(value) {

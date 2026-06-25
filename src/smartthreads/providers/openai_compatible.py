@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from typing import Iterable
 
 from smartthreads.costs import usage_from_openai
@@ -26,11 +27,13 @@ class OpenAICompatibleProvider(BaseProvider):
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": self._user_content(prompt, image_paths)})
 
+        start = time.monotonic()
         raw = self._post_json(
             f"{self.config.base_url}/chat/completions",
             {"model": self.config.model, "messages": messages},
             {"Authorization": f"Bearer {self.config.api_key}"},
         )
+        elapsed_seconds = time.monotonic() - start
 
         try:
             text = raw["choices"][0]["message"]["content"].strip()
@@ -44,7 +47,7 @@ class OpenAICompatibleProvider(BaseProvider):
             model=self.config.model,
             text=text,
             raw=raw,
-            usage=usage_from_openai(self.config.model, raw.get("usage")),
+            usage=usage_from_openai(self.config.model, raw.get("usage"), elapsed_seconds),
         )
 
     def _user_content(self, prompt: str, image_paths: Iterable[str]) -> str | list[dict]:

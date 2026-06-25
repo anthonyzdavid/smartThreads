@@ -88,10 +88,11 @@ mode tries the local model first, then escalates when the local call fails or th
 answer looks too weak for the task. The Internet button bypasses auto routing
 for one prompt.
 
-Each answer shows token usage when the backend returns it. Local Ollama calls are
-shown as $0.00 API cost. Internet calls show estimated dollars when pricing is
-configured for the model; `gpt-4o-mini` defaults to OpenAI's published pricing of
-$0.15 per 1M input tokens and $0.60 per 1M output tokens.
+Each answer shows token usage when the backend returns it, including input
+tokens, output tokens, total tokens, token speed, and estimated cost. Local
+Ollama calls are shown as $0.00 API cost. Internet calls show estimated dollars
+when pricing is configured for the model; `gpt-4o-mini` defaults to OpenAI's
+published pricing of $0.15 per 1M input tokens and $0.60 per 1M output tokens.
 
 Use **Check Models** in the sidebar to ask local Ollama for installed models and
 to verify the internet API key against the provider's `/models` endpoint.
