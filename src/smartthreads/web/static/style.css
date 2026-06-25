@@ -172,6 +172,27 @@ label {
   word-break: break-word;
 }
 
+.model-option {
+  display: block;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 7px;
+  color: var(--accent-strong);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  word-break: break-word;
+}
+
+.model-option:hover,
+.model-option:focus {
+  border-color: var(--line);
+  background: #ffffff;
+}
+
 .inventory-error {
   margin-top: 6px;
   color: var(--signal);

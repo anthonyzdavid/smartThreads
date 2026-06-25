@@ -236,12 +236,12 @@ async function checkAvailableModels() {
 function renderModelInventory(body) {
   modelInventory.innerHTML = "";
   modelInventory.append(
-    modelGroup("Local Ollama", body.local),
-    modelGroup("Internet API", body.internet),
+    modelGroup("Local Ollama", body.local, "local"),
+    modelGroup("Internet API", body.internet, "internet"),
   );
 }
 
-function modelGroup(title, result) {
+function modelGroup(title, result, target) {
   result = result || { verified: false, models: [], error: "No response returned" };
   const group = document.createElement("div");
   group.className = "model-group";
@@ -262,7 +262,13 @@ function modelGroup(title, result) {
   const models = result.models || [];
   for (const item of models.slice(0, 8)) {
     const row = document.createElement("li");
-    row.textContent = item.id;
+    const modelButton = document.createElement("button");
+    modelButton.className = "model-option";
+    modelButton.type = "button";
+    modelButton.textContent = item.id;
+    modelButton.title = `Use ${item.id}`;
+    modelButton.addEventListener("click", () => selectDiscoveredModel(item.id, target));
+    row.append(modelButton);
     list.append(row);
   }
   if (models.length > 8) {
@@ -277,6 +283,20 @@ function modelGroup(title, result) {
   }
   group.append(list);
   return group;
+}
+
+function selectDiscoveredModel(modelId, target) {
+  if (target === "internet") {
+    internetModel.value = modelId;
+    if (provider.value === "internet") {
+      model.value = modelId;
+    }
+    setRuntimeStatus("Internet model selected", "ok");
+    return;
+  }
+
+  model.value = modelId;
+  setRuntimeStatus("Local model selected", "ok");
 }
 
 function autosizePrompt() {

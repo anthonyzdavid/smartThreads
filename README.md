@@ -95,7 +95,9 @@ when pricing is configured for the model; `gpt-4o-mini` defaults to OpenAI's
 published pricing of $0.15 per 1M input tokens and $0.60 per 1M output tokens.
 
 Use **Check Models** in the sidebar to ask local Ollama for installed models and
-to verify the internet API key against the provider's `/models` endpoint.
+to verify the internet API key against the provider's `/models` endpoint. The
+returned model names are buttons, so you can click a discovered local or internet
+model instead of typing it by hand.
 
 ## Environment Variables
 
