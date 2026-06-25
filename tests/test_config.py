@@ -11,7 +11,7 @@ def test_auto_defaults(monkeypatch):
     config = HarnessConfig.from_env()
 
     assert config.normalized_provider == "auto"
-    assert config.model == "qwen3.5:0.8b"
+    assert config.model == "codellama:latest"
     assert config.base_url == "http://localhost:11434"
     assert config.internet_model == "gpt-4o-mini"
     assert config.internet_base_url == "https://api.openai.com/v1"

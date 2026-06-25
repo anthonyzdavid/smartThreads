@@ -44,7 +44,7 @@ def test_get_index_serves_app():
 
     assert response.status == 200
     assert "smartThreads" in body
-    assert "Chat Router" in body
+    assert "Model Router" in body
 
 
 def test_post_chat_routes_to_harness():

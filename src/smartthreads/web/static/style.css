@@ -5,13 +5,36 @@
   --panel: #f6f7f4;
   --line: #d9dfd6;
   --canvas: #fcfbf7;
+  --surface: #ffffff;
+  --surface-soft: rgba(255, 255, 255, 0.56);
+  --secondary-hover: #eef4f1;
   --accent: #146c5f;
   --accent-strong: #0c4f47;
   --signal: #b9462f;
   --assistant: #eef4f1;
   --user: #1f3f39;
   --shadow: 0 18px 50px rgba(34, 43, 38, 0.12);
+  --focus: rgba(20, 108, 95, 0.12);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body[data-theme="bronze"] {
+  color-scheme: dark;
+  --ink: #f4ead8;
+  --muted: #b8a58c;
+  --panel: #15120f;
+  --line: #3a2b1e;
+  --canvas: #0d0c0b;
+  --surface: #211a14;
+  --surface-soft: rgba(194, 122, 43, 0.1);
+  --secondary-hover: #2b2119;
+  --accent: #c97b2d;
+  --accent-strong: #f1b45f;
+  --signal: #ff8f6e;
+  --assistant: #1d1813;
+  --user: #7a4619;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.42);
+  --focus: rgba(201, 123, 45, 0.24);
 }
 
 * {
@@ -45,6 +68,25 @@ textarea {
   padding: 24px;
   background: var(--panel);
   border-right: 1px solid var(--line);
+}
+
+.theme-toggle {
+  align-self: flex-start;
+  min-width: 88px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: var(--accent-strong);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 
 .brand-block,
@@ -95,7 +137,7 @@ label {
   border-radius: 999px;
   padding: 7px 10px;
   color: var(--accent-strong);
-  background: #ffffff;
+  background: var(--surface);
   font-size: 13px;
   font-weight: 700;
 }
@@ -122,7 +164,7 @@ label {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.56);
+  background: var(--surface-soft);
 }
 
 .model-check-panel {
@@ -137,7 +179,7 @@ label {
   border-radius: 8px;
   padding: 11px 12px;
   color: var(--accent-strong);
-  background: #ffffff;
+  background: var(--surface);
   cursor: pointer;
   font-weight: 800;
 }
@@ -147,7 +189,7 @@ label {
   border-radius: 8px;
   padding: 10px 12px;
   color: var(--muted);
-  background: rgba(255, 255, 255, 0.56);
+  background: var(--surface-soft);
   font-size: 13px;
 }
 
@@ -172,6 +214,27 @@ label {
   word-break: break-word;
 }
 
+.model-option {
+  display: block;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 7px;
+  color: var(--accent-strong);
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  word-break: break-word;
+}
+
+.model-option:hover,
+.model-option:focus {
+  border-color: var(--line);
+  background: var(--surface);
+}
+
 .inventory-error {
   margin-top: 6px;
   color: var(--signal);
@@ -193,7 +256,7 @@ textarea {
   border-radius: 8px;
   padding: 11px 12px;
   color: var(--ink);
-  background: #ffffff;
+  background: var(--surface);
   outline: none;
 }
 
@@ -205,7 +268,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(20, 108, 95, 0.12);
+  box-shadow: 0 0 0 3px var(--focus);
 }
 
 .icon-button {
@@ -214,7 +277,7 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--accent-strong);
-  background: #ffffff;
+  background: var(--surface);
   cursor: pointer;
   font-size: 20px;
 }
@@ -246,7 +309,7 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px 16px;
-  background: #ffffff;
+  background: var(--surface);
   box-shadow: var(--shadow);
 }
 
@@ -316,11 +379,11 @@ textarea:focus {
 .composer .secondary-button {
   border: 1px solid var(--line);
   color: var(--accent-strong);
-  background: #ffffff;
+  background: var(--surface);
 }
 
 .composer .secondary-button:hover {
-  background: #eef4f1;
+  background: var(--secondary-hover);
 }
 
 .composer button:disabled {

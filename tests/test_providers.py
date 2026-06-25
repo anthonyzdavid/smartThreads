@@ -14,25 +14,33 @@ def test_ollama_payload_includes_base64_image(monkeypatch, tmp_path):
     def fake_post(self, url, payload, headers=None):
         seen["url"] = url
         seen["payload"] = payload
-        return {
-            "message": {"content": "TRACKING"},
-            "prompt_eval_count": 12,
-            "eval_count": 4,
-        }
+        return [
+            {"message": {"content": "TRACK"}},
+            {
+                "message": {"content": "ING"},
+                "done": True,
+                "prompt_eval_count": 12,
+                "eval_count": 4,
+                "eval_duration": 2_000_000_000,
+            },
+        ]
 
-    monkeypatch.setattr(OllamaProvider, "_post_json", fake_post)
+    monkeypatch.setattr(OllamaProvider, "_post_json_stream", fake_post)
 
     provider = OllamaProvider(HarnessConfig())
     response = provider.generate(prompt="scan", system="sys", image_paths=[str(image)])
 
     assert response.text == "TRACKING"
     assert seen["url"] == "http://localhost:11434/api/chat"
+    assert seen["payload"]["stream"] is True
     assert seen["payload"]["messages"][1]["images"] == [
         base64.b64encode(b"jpg-bytes").decode("ascii")
     ]
     assert response.usage.input_tokens == 12
     assert response.usage.output_tokens == 4
     assert response.usage.total_tokens == 16
+    assert response.usage.tokens_per_second == 2
+    assert response.usage.generation_seconds == 2
     assert response.usage.estimated_cost_usd == 0.0
 
 

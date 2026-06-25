@@ -6,7 +6,7 @@ LLMs and internet-hosted LLMs without changing the calling code.
 The first supported backends are:
 
 - `auto`: local-first routing that escalates to internet models when local fails
-  or returns a weak answer.
+  or returns less than 5 tokens per second.
 - `local` / `ollama`: Ollama's local `/api/chat` endpoint.
 - `internet` / `openai`: OpenAI-compatible `/v1/chat/completions` endpoints.
 
@@ -37,7 +37,7 @@ PYTHONPATH=src python3 -m smartthreads.web
 Run against local Ollama:
 
 ```bash
-python3 -m smartthreads --provider local --model qwen3.5:0.8b \
+python3 -m smartthreads --provider local --model codellama:latest \
   --prompt "Give me a one-line project status."
 ```
 
@@ -56,6 +56,10 @@ Use any OpenAI-compatible service by changing the base URL:
 ```bash
 export SMARTTHREADS_BASE_URL="https://api.example.com/v1"
 ```
+
+For OpenAI specifically, use `https://api.openai.com/v1`. Do not use
+`platform.openai.com` or ChatGPT URLs; those are websites and will return browser
+challenge pages instead of API JSON.
 
 ## CLI
 
@@ -88,13 +92,19 @@ mode tries the local model first, then escalates when the local call fails or th
 answer looks too weak for the task. The Internet button bypasses auto routing
 for one prompt.
 
-Each answer shows token usage when the backend returns it. Local Ollama calls are
-shown as $0.00 API cost. Internet calls show estimated dollars when pricing is
-configured for the model; `gpt-4o-mini` defaults to OpenAI's published pricing of
-$0.15 per 1M input tokens and $0.60 per 1M output tokens.
+The top-left theme button switches between the default Emerald theme and a dark
+Bronze theme.
+
+Each answer shows token usage when the backend returns it, including input
+tokens, output tokens, total tokens, token speed, and estimated cost. Local
+Ollama calls are shown as $0.00 API cost. Internet calls show estimated dollars
+when pricing is configured for the model; `gpt-4o-mini` defaults to OpenAI's
+published pricing of $0.15 per 1M input tokens and $0.60 per 1M output tokens.
 
 Use **Check Models** in the sidebar to ask local Ollama for installed models and
-to verify the internet API key against the provider's `/models` endpoint.
+to verify the internet API key against the provider's `/models` endpoint. The
+returned model names are buttons, so you can click a discovered local or internet
+model instead of typing it by hand.
 
 ## Environment Variables
 

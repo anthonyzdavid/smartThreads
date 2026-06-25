@@ -16,16 +16,17 @@ const connectionPill = document.querySelector("#connectionPill");
 const resetDefaults = document.querySelector("#resetDefaults");
 const checkModels = document.querySelector("#checkModels");
 const modelInventory = document.querySelector("#modelInventory");
+const themeToggle = document.querySelector("#themeToggle");
 
 const defaults = {
   auto: {
-    model: "qwen3.5:0.8b",
+    model: "codellama:latest",
     base_url: "http://localhost:11434",
     internet_model: "gpt-4o-mini",
     internet_base_url: "https://api.openai.com/v1",
   },
   local: {
-    model: "qwen3.5:0.8b",
+    model: "codellama:latest",
     base_url: "http://localhost:11434",
   },
   internet: {
@@ -33,6 +34,21 @@ const defaults = {
     base_url: "https://api.openai.com/v1",
   },
 };
+
+function applyTheme(theme) {
+  const selectedTheme = theme === "bronze" ? "bronze" : "emerald";
+  document.body.dataset.theme = selectedTheme;
+  themeToggle.textContent = selectedTheme === "bronze" ? "Emerald" : "Bronze";
+  themeToggle.setAttribute(
+    "aria-label",
+    selectedTheme === "bronze" ? "Switch to Emerald theme" : "Switch to Bronze theme",
+  );
+  localStorage.setItem("smartthreads.theme", selectedTheme);
+}
+
+function toggleTheme() {
+  applyTheme(document.body.dataset.theme === "bronze" ? "emerald" : "bronze");
+}
 
 function setRuntimeStatus(text, tone = "neutral") {
   runtimeStatus.textContent = text;
@@ -178,11 +194,24 @@ function formatUsage(usage) {
   if (usage.total_tokens !== null && usage.total_tokens !== undefined) {
     parts.push(`total ${usage.total_tokens}`);
   }
+  if (usage.tokens_per_second !== null && usage.tokens_per_second !== undefined) {
+    parts.push(`speed ${formatTokensPerSecond(usage.tokens_per_second)}`);
+  }
   if (usage.estimated_cost_usd !== null && usage.estimated_cost_usd !== undefined) {
     parts.push(`cost ${formatCost(usage.estimated_cost_usd)}`);
   }
 
   return `Tokens: ${parts.join(" · ")}${usage.cost_note ? ` · ${usage.cost_note}` : ""}`;
+}
+
+function formatTokensPerSecond(value) {
+  if (value >= 100) {
+    return `${Math.round(value)} tok/s`;
+  }
+  if (value >= 10) {
+    return `${value.toFixed(1)} tok/s`;
+  }
+  return `${value.toFixed(2)} tok/s`;
 }
 
 function formatCost(value) {
@@ -223,12 +252,12 @@ async function checkAvailableModels() {
 function renderModelInventory(body) {
   modelInventory.innerHTML = "";
   modelInventory.append(
-    modelGroup("Local Ollama", body.local),
-    modelGroup("Internet API", body.internet),
+    modelGroup("Local Ollama", body.local, "local"),
+    modelGroup("Internet API", body.internet, "internet"),
   );
 }
 
-function modelGroup(title, result) {
+function modelGroup(title, result, target) {
   result = result || { verified: false, models: [], error: "No response returned" };
   const group = document.createElement("div");
   group.className = "model-group";
@@ -249,7 +278,13 @@ function modelGroup(title, result) {
   const models = result.models || [];
   for (const item of models.slice(0, 8)) {
     const row = document.createElement("li");
-    row.textContent = item.id;
+    const modelButton = document.createElement("button");
+    modelButton.className = "model-option";
+    modelButton.type = "button";
+    modelButton.textContent = item.id;
+    modelButton.title = `Use ${item.id}`;
+    modelButton.addEventListener("click", () => selectDiscoveredModel(item.id, target));
+    row.append(modelButton);
     list.append(row);
   }
   if (models.length > 8) {
@@ -266,6 +301,20 @@ function modelGroup(title, result) {
   return group;
 }
 
+function selectDiscoveredModel(modelId, target) {
+  if (target === "internet") {
+    internetModel.value = modelId;
+    if (provider.value === "internet") {
+      model.value = modelId;
+    }
+    setRuntimeStatus("Internet model selected", "ok");
+    return;
+  }
+
+  model.value = modelId;
+  setRuntimeStatus("Local model selected", "ok");
+}
+
 function autosizePrompt() {
   promptInput.style.height = "auto";
   promptInput.style.height = `${Math.min(promptInput.scrollHeight, 180)}px`;
@@ -274,6 +323,7 @@ function autosizePrompt() {
 provider.addEventListener("change", applyProviderDefaults);
 resetDefaults.addEventListener("click", applyProviderDefaults);
 checkModels.addEventListener("click", checkAvailableModels);
+themeToggle.addEventListener("click", toggleTheme);
 form.addEventListener("submit", sendPrompt);
 internetButton.addEventListener("click", () => sendPrompt(null, "internet"));
 promptInput.addEventListener("input", autosizePrompt);
@@ -282,6 +332,8 @@ promptInput.addEventListener("keydown", (event) => {
     form.requestSubmit();
   }
 });
+
+applyTheme(localStorage.getItem("smartthreads.theme") || "emerald");
 
 loadConfig().catch((error) => {
   setRuntimeStatus("Config error", "error");
