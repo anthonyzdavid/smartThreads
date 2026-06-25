@@ -14,6 +14,8 @@ import webbrowser
 
 from smartthreads.config import HarnessConfig
 from smartthreads.harness import AIHarness, HarnessError
+from smartthreads.providers import ProviderError
+from smartthreads.providers.openai_compatible import normalize_openai_compatible_base_url
 
 
 DEFAULT_HOST = "127.0.0.1"
@@ -246,12 +248,13 @@ def _discover_openai_compatible(config: HarnessConfig) -> dict:
         }
 
     try:
+        base_url = normalize_openai_compatible_base_url(config.base_url)
         raw = _get_json(
-            f"{config.base_url}/models",
+            f"{base_url}/models",
             timeout=config.timeout,
             headers={"Authorization": f"Bearer {config.api_key}"},
         )
-    except HarnessError as exc:
+    except (HarnessError, ProviderError) as exc:
         return {
             "verified": False,
             "error": str(exc),
@@ -278,8 +281,10 @@ def _get_json(url: str, *, timeout: float, headers: dict[str, str] | None = None
         with urlopen(request, timeout=timeout) as response:
             body = response.read().decode("utf-8")
     except HTTPError as exc:
-        details = exc.read().decode("utf-8", errors="replace")
-        raise HarnessError(f"model discovery HTTP {exc.code}: {details}") from exc
+        from smartthreads.providers.base import _summarize_error_body
+
+        details = _summarize_error_body(exc.read().decode("utf-8", errors="replace"))
+        raise HarnessError(f"model discovery HTTP {exc.code} at {url}: {details}") from exc
     except URLError as exc:
         raise HarnessError(f"model discovery failed: {exc.reason}") from exc
 

@@ -57,6 +57,10 @@ Use any OpenAI-compatible service by changing the base URL:
 export SMARTTHREADS_BASE_URL="https://api.example.com/v1"
 ```
 
+For OpenAI specifically, use `https://api.openai.com/v1`. Do not use
+`platform.openai.com` or ChatGPT URLs; those are websites and will return browser
+challenge pages instead of API JSON.
+
 ## CLI
 
 ```bash
