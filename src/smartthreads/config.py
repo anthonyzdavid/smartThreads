@@ -8,12 +8,13 @@ LOCAL_PROVIDERS = {"local", "ollama"}
 INTERNET_PROVIDERS = {"internet", "openai"}
 AUTO_PROVIDERS = {"auto"}
 SUPPORTED_PROVIDERS = LOCAL_PROVIDERS | INTERNET_PROVIDERS | AUTO_PROVIDERS
+DEFAULT_LOCAL_MODEL = "codellama:latest"
 
 
 @dataclass(frozen=True)
 class HarnessConfig:
     provider: str = "auto"
-    model: str = "qwen3.5:0.8b"
+    model: str = DEFAULT_LOCAL_MODEL
     base_url: str = "http://localhost:11434"
     api_key: str | None = None
     timeout: float = 120.0
@@ -43,7 +44,7 @@ class HarnessConfig:
         selected_internet_base_url = internet_base_url or os.getenv("SMARTTHREADS_INTERNET_BASE_URL")
 
         if selected_provider in LOCAL_PROVIDERS or selected_provider in AUTO_PROVIDERS:
-            selected_model = selected_model or "qwen3.5:0.8b"
+            selected_model = selected_model or DEFAULT_LOCAL_MODEL
             selected_base_url = selected_base_url or "http://localhost:11434"
         elif selected_provider in INTERNET_PROVIDERS:
             selected_model = selected_model or "gpt-4o-mini"
@@ -54,7 +55,7 @@ class HarnessConfig:
 
         return cls(
             provider=selected_provider,
-            model=selected_model or "qwen3.5:0.8b",
+            model=selected_model or DEFAULT_LOCAL_MODEL,
             base_url=(selected_base_url or "http://localhost:11434").rstrip("/"),
             api_key=api_key or os.getenv("SMARTTHREADS_API_KEY"),
             timeout=selected_timeout if selected_timeout is not None else 120.0,

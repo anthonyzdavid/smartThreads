@@ -20,13 +20,13 @@ const themeToggle = document.querySelector("#themeToggle");
 
 const defaults = {
   auto: {
-    model: "qwen3.5:0.8b",
+    model: "codellama:latest",
     base_url: "http://localhost:11434",
     internet_model: "gpt-4o-mini",
     internet_base_url: "https://api.openai.com/v1",
   },
   local: {
-    model: "qwen3.5:0.8b",
+    model: "codellama:latest",
     base_url: "http://localhost:11434",
   },
   internet: {

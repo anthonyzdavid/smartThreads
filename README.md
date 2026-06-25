@@ -6,7 +6,7 @@ LLMs and internet-hosted LLMs without changing the calling code.
 The first supported backends are:
 
 - `auto`: local-first routing that escalates to internet models when local fails
-  or returns a weak answer.
+  or returns less than 5 tokens per second.
 - `local` / `ollama`: Ollama's local `/api/chat` endpoint.
 - `internet` / `openai`: OpenAI-compatible `/v1/chat/completions` endpoints.
 
@@ -37,7 +37,7 @@ PYTHONPATH=src python3 -m smartthreads.web
 Run against local Ollama:
 
 ```bash
-python3 -m smartthreads --provider local --model qwen3.5:0.8b \
+python3 -m smartthreads --provider local --model codellama:latest \
   --prompt "Give me a one-line project status."
 ```
 

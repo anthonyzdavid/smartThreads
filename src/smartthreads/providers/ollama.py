@@ -30,14 +30,16 @@ class OllamaProvider(BaseProvider):
         messages.append(user_message)
 
         start = time.monotonic()
-        raw = self._post_json(
-            f"{self.config.base_url}/api/chat",
-            {
-                "model": self.config.model,
-                "messages": messages,
-                "stream": False,
-                "keep_alive": "15m",
-            },
+        raw = _combine_stream_chunks(
+            self._post_json_stream(
+                f"{self.config.base_url}/api/chat",
+                {
+                    "model": self.config.model,
+                    "messages": messages,
+                    "stream": True,
+                    "keep_alive": "15m",
+                },
+            )
         )
         elapsed_seconds = time.monotonic() - start
         text = raw.get("message", {}).get("content", "").strip()
@@ -51,3 +53,17 @@ class OllamaProvider(BaseProvider):
             raw=raw,
             usage=usage_from_ollama(raw, elapsed_seconds),
         )
+
+
+def _combine_stream_chunks(chunks: list[dict]) -> dict:
+    if not chunks:
+        raise ProviderError("local provider returned an empty stream")
+
+    content = "".join(
+        chunk.get("message", {}).get("content", "") for chunk in chunks
+    )
+    final = dict(chunks[-1])
+    message = dict(final.get("message") or {})
+    message["content"] = content
+    final["message"] = message
+    return final
