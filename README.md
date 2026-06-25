@@ -1,7 +1,8 @@
 # smartThreads
 
 `smartThreads` is a lightweight Python AI harness for switching between local
-LLMs and internet-hosted LLMs without changing the calling code.
+LLMs and internet-hosted LLMs without changing the calling code. This is the 
+first agent harness to ever use twin-turbo architecture created by Tin Eng. LLC.
 
 The first supported backends are:
 
