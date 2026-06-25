@@ -16,6 +16,7 @@ const connectionPill = document.querySelector("#connectionPill");
 const resetDefaults = document.querySelector("#resetDefaults");
 const checkModels = document.querySelector("#checkModels");
 const modelInventory = document.querySelector("#modelInventory");
+const themeToggle = document.querySelector("#themeToggle");
 
 const defaults = {
   auto: {
@@ -33,6 +34,21 @@ const defaults = {
     base_url: "https://api.openai.com/v1",
   },
 };
+
+function applyTheme(theme) {
+  const selectedTheme = theme === "bronze" ? "bronze" : "emerald";
+  document.body.dataset.theme = selectedTheme;
+  themeToggle.textContent = selectedTheme === "bronze" ? "Emerald" : "Bronze";
+  themeToggle.setAttribute(
+    "aria-label",
+    selectedTheme === "bronze" ? "Switch to Emerald theme" : "Switch to Bronze theme",
+  );
+  localStorage.setItem("smartthreads.theme", selectedTheme);
+}
+
+function toggleTheme() {
+  applyTheme(document.body.dataset.theme === "bronze" ? "emerald" : "bronze");
+}
 
 function setRuntimeStatus(text, tone = "neutral") {
   runtimeStatus.textContent = text;
@@ -307,6 +323,7 @@ function autosizePrompt() {
 provider.addEventListener("change", applyProviderDefaults);
 resetDefaults.addEventListener("click", applyProviderDefaults);
 checkModels.addEventListener("click", checkAvailableModels);
+themeToggle.addEventListener("click", toggleTheme);
 form.addEventListener("submit", sendPrompt);
 internetButton.addEventListener("click", () => sendPrompt(null, "internet"));
 promptInput.addEventListener("input", autosizePrompt);
@@ -315,6 +332,8 @@ promptInput.addEventListener("keydown", (event) => {
     form.requestSubmit();
   }
 });
+
+applyTheme(localStorage.getItem("smartthreads.theme") || "emerald");
 
 loadConfig().catch((error) => {
   setRuntimeStatus("Config error", "error");

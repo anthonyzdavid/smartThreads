@@ -88,6 +88,9 @@ mode tries the local model first, then escalates when the local call fails or th
 answer looks too weak for the task. The Internet button bypasses auto routing
 for one prompt.
 
+The top-left theme button switches between the default Emerald theme and a dark
+Bronze theme.
+
 Each answer shows token usage when the backend returns it, including input
 tokens, output tokens, total tokens, token speed, and estimated cost. Local
 Ollama calls are shown as $0.00 API cost. Internet calls show estimated dollars
